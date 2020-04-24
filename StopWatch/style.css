@@ -1,0 +1,35 @@
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+.container{
+    width: 100vw;
+    height: 100vh;
+    background-color: #333;
+}
+section{
+    display: flex;
+    flex-direction: column;
+    flex: auto;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+button{
+    border: transparent;
+    background: transparent;
+    transition: all 0.5s ease;
+    outline: none;
+}
+
+button:hover{
+    transform: scale(1.2);
+}
+
+#duration{
+    padding: 10px;
+    text-align: center;
+    border-radius: 15px;
+    font-size: 20px;
+}
