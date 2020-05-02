@@ -16,6 +16,13 @@ figure .image img {
 
 .notification {
   margin-top: 20px !important;
+  width: 660px;
+  height: 150px;
+}
+
+.media{
+  width: 660px;
+  height: 200px;
 }
 
 .results {

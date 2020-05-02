@@ -44,7 +44,7 @@ createAutoComplete({
   ...autoCompleteConfig,
   onOptionSelect(item) {
     document.querySelector(".tutorial").classList.add("is-hidden");
-    onMovieSelect(item, document.querySelector('#left-summary'));
+    onMovieSelect(item, document.querySelector("#left-summary"), "left");
   },
   root: document.querySelector("#left-autocomplete"),
 });
@@ -53,14 +53,15 @@ createAutoComplete({
   ...autoCompleteConfig,
   onOptionSelect(item) {
     document.querySelector(".tutorial").classList.add("is-hidden");
-    onMovieSelect(item, document.querySelector('#right-summary'));
+    onMovieSelect(item, document.querySelector("#right-summary"), "right");
   },
   root: document.querySelector("#right-autocomplete"),
 });
 
 // Making a follow Up Request //
-
-const onMovieSelect = async (item, summarySelect) => {
+let leftMovie;
+let rightMovie;
+const onMovieSelect = async (item, summarySelect, side) => {
   const response = await axios.get("http://www.omdbapi.com/", {
     params: {
       apikey: "354c3500",
@@ -69,11 +70,65 @@ const onMovieSelect = async (item, summarySelect) => {
   });
 
   summarySelect.innerHTML = movieTemplate(response.data);
+
+  if (side === "left") {
+    leftMovie = response.data;
+  } else {
+    rightMovie = response.data;
+  }
+
+  if (leftMovie && rightMovie) {
+    runCompare();
+  }
 };
 
+const runCompare = () => {
+  const leftSideStats = document.querySelectorAll(
+    "#left-summary .notification"
+  );
+  const rightSideStats = document.querySelectorAll(
+    "#right-summary .notification"
+  );
+
+  leftSideStats.forEach((leftStat, index) => {
+    const rightStat = rightSideStats[index];
+
+    const leftSideValue = parseInt(leftStat.dataset.value);
+    const rightSideValue = parseInt(rightStat.dataset.value);
+
+    console.log(leftSideValue, rightSideValue);
+
+    if (rightSideValue > leftSideValue) {
+      leftStat.classList.remove("is-primary");
+      leftStat.classList.add("is-warning");
+    } else if (rightSideValue < leftSideValue) {
+      rightStat.classList.remove("is-primary");
+      rightStat.classList.add("is-warning");
+    }
+    else{
+
+    }
+  });
+};
 // Making Movie Temp //
 
 const movieTemplate = (itemDetail) => {
+  const imdbRating = parseFloat(itemDetail.imdbRating);
+  const imdbVotes = parseInt(itemDetail.imdbVotes.replace(/,/g, ""));
+
+  let count = 0;
+  const awards = itemDetail.Awards.split(" ").forEach((word) => {
+    const value = parseInt(word);
+
+    if (isNaN(value)) {
+      return;
+    } else {
+      count = count + value;
+    }
+  });
+
+  console.log(imdbRating, imdbVotes, count);
+
   console.log(itemDetail);
   return `
     <article class="media">
@@ -90,7 +145,7 @@ const movieTemplate = (itemDetail) => {
         </div>
       </div>
     </article>
-    <article class = "notification is-primary">
+    <article data-value = ${count} class = "notification is-primary">
       <p class = "title">Awards</p>
       <p class = "subtitle is-4">${itemDetail.Awards}</p>
     </article>
@@ -98,9 +153,13 @@ const movieTemplate = (itemDetail) => {
       <p class = "title">Actors</p>
       <p class = "subtitle is-4">${itemDetail.Actors}</p>
     </article>
-    <article class = "notification is-primary">
+    <article data-value = ${imdbRating} class = "notification is-primary">
       <p class = "title">IMDB Rating</p>
       <p class = "subtitle is-4">${itemDetail.imdbRating}</p>
     </article>
+    <article data-value = ${imdbVotes} class = "notification is-primary">
+    <p class = "title">IMDB Votes</p>
+    <p class = "subtitle is-4">${itemDetail.imdbVotes}</p>
+  </article>
   `;
 };
