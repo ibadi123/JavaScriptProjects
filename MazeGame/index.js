@@ -1,8 +1,10 @@
 const { Engine, Render, Runner, World, Bodies } = Matter;
 
-const width = 800;
-const height = 800;
-const cells = 3;
+const width = 600;
+const height = 600;
+const cells = 5;
+
+const unitLength = width / cells;
 
 const engine = Engine.create();
 const { world } = engine;
@@ -21,10 +23,10 @@ Runner.run(Runner.create(), engine);
 // Creating & Adding Walls //
 
 const walls = [
-  Bodies.rectangle(width / 2, 0, width, 50, { isStatic: true }),
-  Bodies.rectangle(width / 2, height, width, 50, { isStatic: true }),
-  Bodies.rectangle(0, height / 2, 50, height, { isStatic: true }),
-  Bodies.rectangle(width, height / 2, 50, height, { isStatic: true }),
+  Bodies.rectangle(width / 2, 0, width, 2, { isStatic: true }),
+  Bodies.rectangle(width / 2, height, width, 2, { isStatic: true }),
+  Bodies.rectangle(0, height / 2, 2, height, { isStatic: true }),
+  Bodies.rectangle(width, height / 2, 2, height, { isStatic: true }),
 ];
 
 World.add(world, walls);
@@ -98,10 +100,59 @@ const stepThroughMaze = (row, col) => {
     } else if (direction === "down") {
       Horizontals[row][col] = true;
     }
+    stepThroughMaze(nextRow, nextCol);
   }
   // Visit that next cell
 };
 
 stepThroughMaze(startRow, startCol);
 
-console.log(grid);
+// Adding Horizontal lines to the canvas //
+Horizontals.forEach((row, rowIndex) => {
+  row.forEach((open, colIndex) => {
+    if (open) {
+      return;
+    }
+    const wall = Bodies.rectangle(
+      colIndex * unitLength + unitLength / 2,
+      rowIndex * unitLength + unitLength,
+      unitLength,
+      5,
+      {
+        isStatic: true,
+      }
+    );
+    World.add(world, wall);
+  });
+});
+
+// Adding Vertical lines to the canvas //
+Verticals.forEach((row, rowIndex) => {
+  row.forEach((open, colIndex) => {
+    if (open) {
+      return;
+    }
+    const wall = Bodies.rectangle(
+      colIndex * unitLength + unitLength,
+      rowIndex * unitLength + unitLength / 2,
+      5,
+      unitLength,
+      {
+        isStatic: true,
+      }
+    );
+    World.add(world, wall);
+  });
+});
+
+// Adding the Goal //
+const goal = Bodies.rectangle(
+  width - unitLength / 2,
+  height - unitLength / 2,
+  unitLength * 0.7,
+  unitLength * 0.7,
+  {
+    isStatic: true
+  }
+);
+World.add(world, goal);
