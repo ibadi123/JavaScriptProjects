@@ -5,8 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Maze Game!!!</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.14.2/matter.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+      .hidden {
+        display: none !important;
+      }
+      h1 {
+        color: white;
+        font-size: 46px;
+      }
+      .winner {
+        position: absolute;
+        top: 25vh;
+        left: 45vw;
+        z-index: 1;
+        border: solid white 2px;
+        border-radius: 25%;
+        padding: 20px;
+        transition: all 2s ease;
+      }
+    </style>
   </head>
   <body>
+    <div class="winner hidden">
+      <h1>You Win!</h1>
+    </div>
     <script src="index.js"></script>
   </body>
 </html>
