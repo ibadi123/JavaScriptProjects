@@ -2,7 +2,7 @@ const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
 
 const width = window.innerWidth;
 const height = window.innerHeight;
-const cellsHorizontal = 12;
+const cellsHorizontal = 10;
 const cellsVertical = 8;
 
 const unitLengthX = width / cellsHorizontal;
@@ -203,40 +203,50 @@ document.addEventListener("keydown", (event) => {
 });
 const winner = document.querySelector(".winner");
 
+const labels = ["ball", "goal"];
+let wallLabels = ["ball", "danger"];
+
 // Win Condition //
 Events.on(engine, "collisionStart", (event) => {
   event.pairs.forEach((collision) => {
-    const labels = ["ball", "goal"];
-    const wallLabels = ["ball", "danger"];
-
     if (
       labels.includes(collision.bodyA.label) &&
       labels.includes(collision.bodyB.label)
     ) {
+      wallLabels = [];
       winner.classList.remove("hidden");
       let value = getComputedStyle(winner).top.slice(0, -2);
       winner.style.top = parseInt(value) + 250 + "px";
       winner.style.top = parseInt(value) - 200 + "px";
       world.gravity.y = 1;
       world.bodies.forEach((body) => {
-        if (body.label === "wall") {
+        if (body.label === "wall" || body.label === "danger") {
           Body.setStatic(body, false);
         }
       });
-      setTimeout(load, 3000);
-    } else if (
+      setTimeout(load, 4000);
+    }
+    if (
       wallLabels.includes(collision.bodyA.label) &&
       wallLabels.includes(collision.bodyB.label)
     ) {
+      console.log(collision.bodyA.label, collision.bodyB.label);
+      winner.querySelector("h1").textContent = "You Lose";
+      winner.classList.remove("hidden");
+      let value = getComputedStyle(winner).top.slice(0, -2);
       world.gravity.y = 1;
-      world.bodies.forEach((bodyE) => {
-        if (bodyE.label === "danger") {
-          world.bodies.forEach((body) => {
-            Body.setStatic(body, false);
+      world.bodies.forEach((body) => {
+        if (body.label === "danger") {
+          world.bodies.forEach((bodyL) => {
+            if (bodyL.label === "wall" || bodyL.label === "danger")
+              Body.setStatic(bodyL, false);
+            else if (bodyL.label === "ball") {
+              Body.setStatic(bodyL, true);
+            }
           });
         }
       });
-      setTimeout(load, 5000);
+      setTimeout(load, 3000);
     }
   });
 });
