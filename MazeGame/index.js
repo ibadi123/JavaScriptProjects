@@ -2,7 +2,7 @@ const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
 
 const width = window.innerWidth;
 const height = window.innerHeight;
-const cellsHorizontal = 10;
+const cellsHorizontal = 12;
 const cellsVertical = 8;
 
 const unitLengthX = width / cellsHorizontal;
@@ -225,15 +225,16 @@ Events.on(engine, "collisionStart", (event) => {
         }
       });
       setTimeout(load, 4000);
-    }
-    if (
+    } else if (
       wallLabels.includes(collision.bodyA.label) &&
       wallLabels.includes(collision.bodyB.label)
     ) {
-      console.log(collision.bodyA.label, collision.bodyB.label);
+      wallLabels = [];
       winner.querySelector("h1").textContent = "You Lose";
       winner.classList.remove("hidden");
       let value = getComputedStyle(winner).top.slice(0, -2);
+      winner.style.top = parseInt(value) + 250 + "px";
+      winner.style.top = parseInt(value) - 200 + "px";
       world.gravity.y = 1;
       world.bodies.forEach((body) => {
         if (body.label === "danger") {
