@@ -1,5 +1,8 @@
 const fs = require("fs");
 const crypto = require("crypto");
+const util = require("util");
+
+const scrypt = util.promisify(crypto.scrypt);
 
 class UsersRepository {
   constructor(filename) {
@@ -25,9 +28,27 @@ class UsersRepository {
 
   async create(attrs) {
     attrs.id = this.randomId();
+
+    const salt = crypto.randomBytes(8).toString("hex");
+    const hashed = await scrypt(attrs.password, salt, 64);
+
     const records = await this.getAll();
-    records.push(attrs);
+    const record = {
+      ...attrs,
+      password: `${hashed.toString("hex")}.${salt}`,
+    };
+    records.push(record);
+
     await this.writeAll(records);
+
+    return record;
+  }
+
+  async comparePasswords(saved, supplied) {
+    const [hashed, salt] = saved.split(".");
+    const hashedSupplied = await scrypt(supplied, salt, 64).toString("hex");
+
+    return hashed === hashedSupplied;
   }
 
   async writeAll(records) {
@@ -63,13 +84,21 @@ class UsersRepository {
     Object.assign(record, attrs);
     await this.writeAll(records);
   }
+
+  async getOneBy(filters) {
+    const records = await this.getAll();
+    for (let record of records) {
+      let found = true;
+      for (let key in filters) {
+        if (record[key] != filters[key]) {
+          found = false;
+        }
+        if (found) {
+          return record;
+        }
+      }
+    }
+  }
 }
 
-const test = async () => {
-  const repo = new UsersRepository("users.json");
-
-  const users = await repo.getAll();
-  console.log(users);
-};
-
-test();
+module.exports = new UsersRepository("users.json");
